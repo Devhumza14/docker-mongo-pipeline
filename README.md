@@ -26,3 +26,42 @@ Ensure you have installed the necessary packages via your terminal:
 # Example for Ubuntu
 sudo apt update
 sudo apt install docker.io nodejs npm
+```
+## 🛠️ Quick Start Guide
+
+### 1. Provision the Infrastructure
+Create the internal bridge network so the containers can securely talk to each other:
+```bash
+docker network create mongo-network
+```
+Spin up the database using the stable 4.4 version to avoid silent OS compatibility crashes:
+
+```bash
+docker run -d \
+  --name mongodb \
+  --net mongo-network \
+  -p 27017:27017 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=password \
+  mongo:4.4
+```
+Spin up the Mongo Express web UI:
+
+```bash
+docker run -d \
+  --name mongo-express \
+  --net mongo-network \
+  -p 8081:8081 \
+  -e ME_CONFIG_MONGODB_URL="mongodb://admin:password@mongodb:27017" \
+  mongo-express:latest
+```
+### 2. Launch the Application
+Install the native Node.js dependencies and start the local server:
+
+```bash
+npm install
+node server.js
+```
+### 3. Verify the Pipeline
+* **Frontend App:** Visit `http://localhost:3000` to submit data from the host OS.
+* **Database UI:** Visit `http://localhost:8081` to verify the data was securely routed into the containerized database.
